@@ -18,17 +18,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clean up any existing PostgreSQL container
+      - name: Clean up existing PostgreSQL container
         run: |
-          docker ps -a -q --filter "name=postgres-dev" | grep -q . && docker rm -f postgres-dev || echo "No existing container to remove"
+          if [ $(docker ps -aq -f name=postgres-dev) ]; then
+            echo "Removing existing PostgreSQL container..."
+            docker stop postgres-dev || true
+            docker rm -f postgres-dev || true
+          fi
 
-      - name: Set up PostgreSQL with Docker
-        run: |
-          docker run --name postgres-dev \
-            -e POSTGRES_USER=local_user \
-            -e POSTGRES_PASSWORD=local_password \
-            -e POSTGRES_DB=local_db \
-            -d -p 5432:5432 postgres:latest
+      - name: Set up services with Docker Compose
+        run: docker compose -f infra/compose.yaml up -d
 
       - name: Wait for PostgreSQL to be ready
         run: |
