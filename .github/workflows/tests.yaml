@@ -20,10 +20,7 @@ jobs:
 
       - name: Clean up any existing PostgreSQL container
         run: |
-          if [ $(docker ps -aq -f name=postgres-dev) ]; then
-            echo "Removing existing PostgreSQL container..."
-            docker rm -f postgres-dev
-          fi
+          docker ps -a -q --filter "name=postgres-dev" | grep -q . && docker rm -f postgres-dev || echo "No existing container to remove"
 
       - name: Set up PostgreSQL with Docker
         run: |
