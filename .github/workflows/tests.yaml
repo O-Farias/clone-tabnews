@@ -26,8 +26,13 @@ jobs:
             docker rm -f postgres-dev || true
           fi
 
-      - name: Set up services with Docker Compose
-        run: docker compose -f infra/compose.yaml up -d
+      - name: Set up PostgreSQL with Docker
+        run: |
+          docker run --name postgres-dev \
+            -e POSTGRES_USER=local_user \
+            -e POSTGRES_PASSWORD=local_password \
+            -e POSTGRES_DB=local_db \
+            -d -p 5432:5432 postgres:latest
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -36,6 +41,10 @@ jobs:
             echo "Waiting for PostgreSQL to be ready..."
             sleep 3
           done
+
+      - name: Create the test database
+        run: |
+          docker exec -i postgres-dev psql -U local_user -c "CREATE DATABASE local_db;"
 
       - name: Set environment variables
         run: |
