@@ -1,15 +1,45 @@
 name: Automated Tests
 
-on: pull_request
+on:
+  pull_request:
 
 jobs:
   jest:
     name: Jest Ubuntu
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/hydrogen"
-      - run: npm ci
-      - run: npm test
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up PostgreSQL with Docker
+        run: |
+          docker run --rm --name postgres-dev \
+            -e POSTGRES_USER=local_user \
+            -e POSTGRES_PASSWORD=local_password \
+            -e POSTGRES_DB=local_db \
+            -d -p 5432:5432 postgres:latest
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..10}; do
+            docker exec postgres-dev pg_isready -U local_user && break
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 3
+          done
+
+      - name: Set environment variables
+        run: |
+          echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+          echo "POSTGRES_USER=local_user" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=local_password" >> $GITHUB_ENV
+          echo "POSTGRES_DATABASE=local_db" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: npm test
