@@ -22,7 +22,6 @@ jobs:
         run: |
           if [ $(docker ps -aq -f name=postgres-dev) ]; then
             echo "Removing existing PostgreSQL container..."
-            docker stop postgres-dev || true
             docker rm -f postgres-dev || true
           fi
 
