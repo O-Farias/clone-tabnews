@@ -20,8 +20,7 @@ jobs:
 
       - name: Clean up existing PostgreSQL container
         run: |
-          docker stop postgres-dev || true
-          docker rm postgres-dev || true
+          docker rm -f postgres-dev || true
 
       - name: Set up PostgreSQL with Docker
         run: |
