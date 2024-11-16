@@ -18,9 +18,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clean up existing PostgreSQL container
+      - name: Clean up any existing PostgreSQL container
         run: |
-          docker rm -f postgres-dev || true
+          if [ $(docker ps -aq -f name=postgres-dev) ]; then
+            echo "Removing existing PostgreSQL container..."
+            docker rm -f postgres-dev
+          fi
 
       - name: Set up PostgreSQL with Docker
         run: |
