@@ -44,7 +44,7 @@ jobs:
 
       - name: Create the test database
         run: |
-          docker exec -i postgres-dev psql -U local_user -d postgres -c "CREATE DATABASE local_db;"
+          docker exec -i postgres-dev psql -U local_user -d postgres -c "DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'local_db') THEN CREATE DATABASE local_db; END IF; END \$\$;"
 
       - name: Set environment variables
         run: |
