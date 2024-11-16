@@ -15,6 +15,43 @@ jobs:
         with:
           node-version: "lts/hydrogen"
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npm test
+      - name: Clean up existing PostgreSQL container
+        run: |
+          if [ $(docker ps -aq -f name=postgres-dev) ]; then
+            echo "Removing existing PostgreSQL container..."
+            docker stop postgres-dev || true
+            docker rm -f postgres-dev || true
+          fi
+
+      - name: Set up PostgreSQL with Docker
+        run: |
+          docker run --name postgres-dev \
+            -e POSTGRES_USER=local_user \
+            -e POSTGRES_PASSWORD=local_password \
+            -e POSTGRES_DB=local_db \
+            -d -p 5432:5432 postgres:latest
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..20}; do
+            docker exec postgres-dev pg_isready -U local_user && break
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 3
+          done
+
+      - name: Create the test database
+        run: |
+          docker exec -i postgres-dev psql -U local_user -d postgres -c "DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'local_db') THEN CREATE DATABASE local_db; END IF; END \$\$;"
+
+      - name: Set environment variables
+        run: |
+          echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+          echo "POSTGRES_USER=local_user" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=local_password" >> $GITHUB_ENV
+          echo "POSTGRES_DATABASE=local_db" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: npm test -- --detectOpenHandles
