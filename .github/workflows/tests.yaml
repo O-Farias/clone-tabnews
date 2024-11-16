@@ -43,9 +43,10 @@ jobs:
             sleep 3
           done
 
-      - name: Create the test database
-        run: |
-          docker exec -i postgres-dev psql -U local_user -c "CREATE DATABASE local_db;"
+     - name: Create the test database
+       run: |
+         docker exec -i postgres-dev psql -U local_user -d postgres -c "CREATE DATABASE local_db;"
+
 
       - name: Set environment variables
         run: |
