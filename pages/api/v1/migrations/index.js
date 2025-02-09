@@ -4,11 +4,10 @@ import { resolve } from "node:path";
 import database from "infra/database.js";
 import controller from "infra/controller.js";
 
-
 const router = createRouter();
 
 router.get(getHandler);
-router.post(postHandler);
+router.post(postHandler);s
 
 export default router.handler(controller.errorHandlers);
 
