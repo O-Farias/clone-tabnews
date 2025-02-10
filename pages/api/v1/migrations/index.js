@@ -7,7 +7,7 @@ import controller from "infra/controller.js";
 const router = createRouter();
 
 router.get(getHandler);
-router.post(postHandler);s
+router.post(postHandler);
 
 export default router.handler(controller.errorHandlers);
 

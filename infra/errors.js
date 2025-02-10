@@ -40,9 +40,7 @@ export class ServiceError extends Error {
 
 export class MethodNotAllowedError extends Error {
   constructor() {
-    super("Método não permitido para este endpoint.", {
-      cause,
-    });
+    super("Método não permitido para este endpoint.");
     this.name = "MethodNotAllowedError";
     this.action =
       "Verifique se o método HTTP enviado é válido para este endpoint.";
@@ -54,7 +52,7 @@ export class MethodNotAllowedError extends Error {
       name: this.name,
       message: this.message,
       action: this.action,
-      status_code: this.statusCode,
+      statusCode: this.statusCode,
     };
   }
 }
